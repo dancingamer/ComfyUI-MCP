@@ -352,8 +352,8 @@ def read_message():
 
 
 def write_message(message):
-    body = json.dumps(message, ensure_ascii=False).encode("utf-8")
-    sys.stdout.buffer.write(f"Content-Length: {len(body)}\r\n\r\n".encode("ascii") + body)
+    body = json.dumps(message, ensure_ascii=False, separators=(",", ":"))
+    sys.stdout.buffer.write(body.encode("utf-8") + b"\n")
     sys.stdout.buffer.flush()
 
 
