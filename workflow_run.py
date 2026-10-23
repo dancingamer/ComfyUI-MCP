@@ -242,7 +242,19 @@ def _apply_inputs(node, links, spec, seen):
         for name, value in named.items():
             if name.startswith("lora_") and isinstance(value, dict):
                 inputs[name] = value
+    for name, value in list(inputs.items()):
+        options = _combo_options(spec, name)
+        if options and value not in options:
+            inputs[name] = options[0]
     return inputs
+
+
+def _combo_options(spec, name):
+    for section in ("required", "optional"):
+        config = ((spec.get("input") or {}).get(section) or {}).get(name)
+        if config and isinstance(config[0], list):
+            return config[0]
+    return None
 
 
 def build_workflow_prompt(object_info, workflow_name, positive, negative=None, seed=None):
