@@ -198,6 +198,14 @@ TOOLS = [
             "properties": {"folder": {"type": "string"}},
         },
     },
+    {
+        "name": "comfy_logs",
+        "description": "LC Vision 번역 로그를 반환합니다. 번역이 진행 중인지, 최근 로그가 무엇인지 확인합니다.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {"n": {"type": "integer", "minimum": 1, "maximum": 200, "description": "반환할 로그 줄 수 (기본 50)"}},
+        },
+    },
 ]
 
 
@@ -299,6 +307,12 @@ def call_tool(name, args):
         if isinstance(models, list) and len(models) > 300:
             return text_result({"folder": folder or "(types)", "count": len(models), "files": models[:300], "truncated": True})
         return text_result({"folder": folder or "(types)", "files": models})
+    if name == "comfy_logs":
+        n = int(args.get("n") or 50)
+        status, logs = request("GET", "/lc_vision/translate/logs", query={"n": n})
+        if status != 200:
+            return text_result({"status": status, "error": logs or "LC Vision 로그 엔드포인트를 찾지 못했습니다."}, error=True)
+        return text_result(logs)
     return text_result(f"없는 도구: {name}", error=True)
 
 
